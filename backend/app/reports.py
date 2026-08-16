@@ -798,3 +798,63 @@ def get_attachment(
         filename=
             attachment.original_filename,
     )
+
+# =========================================================
+# DELETE REPORT
+# =========================================================
+
+@router.delete("/{report_id}")
+def delete_report(
+    report_id: int,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    report = (
+        db.query(models.ReportRecord)
+        .filter(
+            models.ReportRecord.id
+            == report_id
+        )
+        .first()
+    )
+
+    if not report:
+        raise HTTPException(
+            status_code=404,
+            detail="Report not found",
+        )
+
+    # Save attachment paths before deleting
+    # the database records.
+    attachment_paths = [
+        Path(attachment.storage_path)
+        for attachment in report.attachments
+        if attachment.storage_path
+    ]
+
+    try:
+        db.delete(report)
+        db.commit()
+
+    except Exception:
+        db.rollback()
+        raise
+
+    # Delete physical files only after the
+    # database transaction succeeds.
+    for path in attachment_paths:
+        try:
+            if path.exists():
+                path.unlink()
+        except OSError:
+            # The report is already deleted from
+            # the database. A missing/unavailable
+            # file should not make the API fail.
+            pass
+
+    return {
+        "message":
+            "Report deleted successfully",
+        "report_id":
+            report_id,
+    }

@@ -435,6 +435,30 @@ export async function rejectOvertime(
   return data;
 }
 
+export async function deleteOvertime(
+  overtimeId
+) {
+  const response = await adminFetch(
+    `${API_URL}/overtime/${overtimeId}`,
+    {
+      method: "DELETE",
+      headers: getAdminHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not delete overtime request"
+      )
+    );
+  }
+
+  return data;
+}
 
 // =========================================================
 // ATTENDANCE
@@ -514,6 +538,30 @@ export async function createAttendanceRecord(
   return data;
 }
 
+export async function deleteAttendanceRecord(
+  recordId
+) {
+  const response = await adminFetch(
+    `${API_URL}/attendance/${recordId}`,
+    {
+      method: "DELETE",
+      headers: getAdminHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not delete attendance record"
+      )
+    );
+  }
+
+  return data;
+}
 
 // =========================================================
 // FOLLOW-UPS
@@ -623,6 +671,30 @@ export async function updateFollowUpStatus(
   return data;
 }
 
+export async function deleteFollowUp(
+  followUpId
+) {
+  const response = await adminFetch(
+    `${API_URL}/followups/${followUpId}`,
+    {
+      method: "DELETE",
+      headers: getAdminHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not delete follow-up"
+      )
+    );
+  }
+
+  return data;
+}
 
 // =========================================================
 // TIME OFF
@@ -695,6 +767,30 @@ export async function createTimeOffRecord(
       getErrorMessage(
         data,
         "Could not create time off record"
+      )
+    );
+  }
+
+  return data;
+}
+export async function deleteTimeOffRecord(
+  recordId
+) {
+  const response = await adminFetch(
+    `${API_URL}/timeoff/${recordId}`,
+    {
+      method: "DELETE",
+      headers: getAdminHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not delete time off record"
       )
     );
   }
@@ -818,6 +914,31 @@ export async function downloadReportAttachment(
   }
 
   return response.blob();
+}
+
+export async function deleteReport(
+  reportId
+) {
+  const response = await adminFetch(
+    `${API_URL}/reports/${reportId}`,
+    {
+      method: "DELETE",
+      headers: getAdminHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not delete report"
+      )
+    );
+  }
+
+  return data;
 }
 
 // =========================================================

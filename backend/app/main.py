@@ -840,7 +840,40 @@ def get_agent_overtime(
         ],
     }
 
+# =========================================================
+# DELETE OVERTIME - ADMIN ONLY
+# =========================================================
 
+@app.delete("/overtime/{overtime_id}")
+def delete_overtime(
+    overtime_id: int,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    overtime_request = (
+        db.query(models.OvertimeRequest)
+        .filter(
+            models.OvertimeRequest.id
+            == overtime_id
+        )
+        .first()
+    )
+
+    if not overtime_request:
+        raise HTTPException(
+            status_code=404,
+            detail="Overtime request not found",
+        )
+
+    db.delete(overtime_request)
+    db.commit()
+
+    return {
+        "message":
+            "Overtime request deleted successfully",
+        "overtime_id":
+            overtime_id,
+    }
 # =========================================================
 # APPROVE OVERTIME - ADMIN ONLY
 # =========================================================

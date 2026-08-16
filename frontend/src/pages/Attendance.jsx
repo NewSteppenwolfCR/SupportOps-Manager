@@ -1,31 +1,44 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import {
   createAttendanceRecord,
+  deleteAttendanceRecord,
   getAgents,
   getAttendanceRecords,
 } from "../services/api";
 
 
 function Attendance() {
-  const [records, setRecords] = useState([]);
-  const [agents, setAgents] = useState([]);
+  const [records, setRecords] =
+    useState([]);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [agents, setAgents] =
+    useState([]);
 
-  const [showModal, setShowModal] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState("");
+  const [loading, setLoading] =
+    useState(true);
 
-  const [form, setForm] = useState({
-    agent_id: "",
-    record_type: "Tardiness",
-    date: "",
-    minutes: "",
-    reference: "Attendance Bot",
-    note: "",
-  });
+  const [error, setError] =
+    useState("");
+
+  const [showModal, setShowModal] =
+    useState(false);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [formData, setFormData] =
+    useState({
+      agent_id: "",
+      record_type: "Tardiness",
+      date: "",
+      minutes: "",
+      reference: "",
+      note: "",
+    });
 
 
   async function loadData() {
@@ -48,8 +61,10 @@ function Attendance() {
       setAgents(
         agentsData.agents || []
       );
+
     } catch (error) {
       setError(error.message);
+
     } finally {
       setLoading(false);
     }
@@ -61,27 +76,28 @@ function Attendance() {
   }, []);
 
 
-  function handleChange(event) {
-    const { name, value } = event.target;
-
-    setForm((current) => ({
-      ...current,
-      [name]: value,
-    }));
-  }
-
-
   function resetForm() {
-    setForm({
+    setFormData({
       agent_id: "",
       record_type: "Tardiness",
       date: "",
       minutes: "",
-      reference: "Attendance Bot",
+      reference: "",
       note: "",
     });
+  }
 
-    setFormError("");
+
+  function handleChange(event) {
+    const {
+      name,
+      value,
+    } = event.target;
+
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+    }));
   }
 
 
@@ -90,56 +106,100 @@ function Attendance() {
 
     try {
       setSaving(true);
-      setFormError("");
+      setError("");
 
-      const payload = {
-        agent_id: Number(form.agent_id),
-        record_type: form.record_type,
-        date: form.date,
+      await createAttendanceRecord({
+        agent_id:
+          Number(formData.agent_id),
+
+        record_type:
+          formData.record_type,
+
+        date:
+          formData.date,
+
         minutes:
-          form.minutes === ""
+          formData.minutes === ""
             ? null
-            : Number(form.minutes),
-        reference:
-          form.reference.trim() || null,
-        note: form.note.trim(),
-      };
+            : Number(formData.minutes),
 
-      await createAttendanceRecord(
-        payload
-      );
+        reference:
+          formData.reference.trim()
+            ? formData.reference.trim()
+            : null,
+
+        note:
+          formData.note.trim(),
+      });
 
       setShowModal(false);
       resetForm();
 
       await loadData();
+
     } catch (error) {
-      setFormError(error.message);
+      setError(error.message);
+
     } finally {
       setSaving(false);
     }
   }
 
 
-  const tardinessCount = records.filter(
-    (record) =>
-      record.record_type === "Tardiness"
-  ).length;
+  async function handleDeleteRecord(
+    record
+  ) {
+    const confirmed = window.confirm(
+      `Delete this ${record.record_type} record for ${record.agent_name}?`
+    );
 
-  const permissionsCount = records.filter(
-    (record) =>
-      record.record_type === "Permission"
-  ).length;
+    if (!confirmed) {
+      return;
+    }
 
-  const absenceCount = records.filter(
-    (record) =>
-      record.record_type === "Absence"
-  ).length;
+    try {
+      setError("");
+
+      await deleteAttendanceRecord(
+        record.id
+      );
+
+      await loadData();
+
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+
+  const tardinessCount =
+    records.filter(
+      (record) =>
+        record.record_type ===
+        "Tardiness"
+    ).length;
+
+
+  const permissionsCount =
+    records.filter(
+      (record) =>
+        record.record_type ===
+        "Permission"
+    ).length;
+
+
+  const absenceCount =
+    records.filter(
+      (record) =>
+        record.record_type ===
+        "Absence"
+    ).length;
 
 
   return (
     <>
       <header className="topbar">
+
         <div>
           <h2>Attendance</h2>
 
@@ -148,6 +208,7 @@ function Attendance() {
             supervisor notes
           </p>
         </div>
+
 
         <button
           className="primary-button"
@@ -158,12 +219,14 @@ function Attendance() {
         >
           + Add Record
         </button>
+
       </header>
 
 
       <section className="dashboard-grid">
 
         <div className="stat-card">
+
           <span className="stat-label">
             Total Records
           </span>
@@ -177,10 +240,12 @@ function Attendance() {
           <small>
             Recorded attendance events
           </small>
+
         </div>
 
 
         <div className="stat-card">
+
           <span className="stat-label">
             Tardiness
           </span>
@@ -194,10 +259,12 @@ function Attendance() {
           <small>
             Logged late arrivals
           </small>
+
         </div>
 
 
         <div className="stat-card">
+
           <span className="stat-label">
             Permissions
           </span>
@@ -211,10 +278,12 @@ function Attendance() {
           <small>
             Logged permissions
           </small>
+
         </div>
 
 
         <div className="stat-card">
+
           <span className="stat-label">
             Absences
           </span>
@@ -228,6 +297,7 @@ function Attendance() {
           <small>
             Logged absences
           </small>
+
         </div>
 
       </section>
@@ -236,6 +306,7 @@ function Attendance() {
       <section className="content-card">
 
         <div className="section-header">
+
           <div>
             <h3>
               Attendance Records
@@ -246,6 +317,7 @@ function Attendance() {
               by management
             </p>
           </div>
+
         </div>
 
 
@@ -275,9 +347,11 @@ function Attendance() {
         {!loading &&
           !error &&
           records.length > 0 && (
+
             <div className="table-wrapper">
 
               <table>
+
                 <thead>
                   <tr>
                     <th>Agent</th>
@@ -287,12 +361,16 @@ function Attendance() {
                     <th>Reference</th>
                     <th>Note</th>
                     <th>Created By</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
 
+
                 <tbody>
+
                   {records.map(
                     (record) => (
+
                       <tr key={record.id}>
 
                         <td>
@@ -301,9 +379,11 @@ function Attendance() {
                           </strong>
                         </td>
 
+
                         <td>
                           {record.date}
                         </td>
+
 
                         <td>
                           <span className="status">
@@ -311,37 +391,59 @@ function Attendance() {
                           </span>
                         </td>
 
-                        <td>
-                          {record.minutes ??
-                            "—"}
-                        </td>
 
                         <td>
-                          {record.reference ||
-                            "—"}
+                          {record.minutes ?? "—"}
                         </td>
+
+
+                        <td>
+                          {record.reference || "—"}
+                        </td>
+
 
                         <td>
                           {record.note}
                         </td>
 
+
                         <td>
                           {record.created_by_admin}
                         </td>
 
+
+                        <td>
+                          <button
+                            type="button"
+                            className="danger-button"
+                            onClick={() =>
+                              handleDeleteRecord(
+                                record
+                              )
+                            }
+                          >
+                            Delete
+                          </button>
+                        </td>
+
                       </tr>
+
                     )
                   )}
+
                 </tbody>
+
               </table>
 
             </div>
+
           )}
 
       </section>
 
 
       {showModal && (
+
         <div
           className="modal-overlay"
           onMouseDown={() =>
@@ -350,7 +452,7 @@ function Attendance() {
         >
 
           <div
-            className="modal"
+            className="modal-card"
             onMouseDown={(event) =>
               event.stopPropagation()
             }
@@ -365,14 +467,14 @@ function Attendance() {
 
                 <p>
                   Document an attendance
-                  event manually.
+                  event for an agent.
                 </p>
               </div>
 
 
               <button
                 type="button"
-                className="close-button"
+                className="modal-close"
                 onClick={() =>
                   setShowModal(false)
                 }
@@ -384,26 +486,29 @@ function Attendance() {
 
 
             <form
-              className="agent-form"
+              className="modal-form"
               onSubmit={handleSubmit}
             >
 
-              <div className="form-group">
-
-                <label>Agent</label>
+              <label>
+                Agent
 
                 <select
                   name="agent_id"
-                  value={form.agent_id}
+                  value={
+                    formData.agent_id
+                  }
                   onChange={handleChange}
                   required
                 >
+
                   <option value="">
                     Select agent
                   </option>
 
                   {agents.map(
                     (agent) => (
+
                       <option
                         key={agent.id}
                         value={agent.id}
@@ -411,135 +516,107 @@ function Attendance() {
                         {agent.first_name}{" "}
                         {agent.last_name}
                       </option>
+
                     )
                   )}
 
                 </select>
-
-              </div>
-
-
-              <div className="form-row">
-
-                <div className="form-group">
-                  <label>
-                    Record type
-                  </label>
-
-                  <select
-                    name="record_type"
-                    value={
-                      form.record_type
-                    }
-                    onChange={
-                      handleChange
-                    }
-                  >
-                    <option value="Tardiness">
-                      Tardiness
-                    </option>
-
-                    <option value="Permission">
-                      Permission
-                    </option>
-
-                    <option value="Absence">
-                      Absence
-                    </option>
-
-                    <option value="Early Leave">
-                      Early Leave
-                    </option>
-
-                    <option value="Schedule Exception">
-                      Schedule Exception
-                    </option>
-
-                    <option value="Other">
-                      Other
-                    </option>
-                  </select>
-                </div>
+              </label>
 
 
-                <div className="form-group">
-                  <label>Date</label>
+              <label>
+                Record Type
 
-                  <input
-                    type="date"
-                    name="date"
-                    value={form.date}
-                    onChange={
-                      handleChange
-                    }
-                    required
-                  />
-                </div>
+                <select
+                  name="record_type"
+                  value={
+                    formData.record_type
+                  }
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="Tardiness">
+                    Tardiness
+                  </option>
 
-              </div>
+                  <option value="Permission">
+                    Permission
+                  </option>
 
+                  <option value="Absence">
+                    Absence
+                  </option>
 
-              <div className="form-row">
+                  <option value="Early Leave">
+                    Early Leave
+                  </option>
 
-                <div className="form-group">
-                  <label>
-                    Minutes
-                  </label>
+                  <option value="Schedule Exception">
+                    Schedule Exception
+                  </option>
 
-                  <input
-                    type="number"
-                    min="0"
-                    name="minutes"
-                    value={form.minutes}
-                    onChange={
-                      handleChange
-                    }
-                    placeholder="Optional"
-                  />
-                </div>
-
-
-                <div className="form-group">
-                  <label>
-                    Reference
-                  </label>
-
-                  <input
-                    type="text"
-                    name="reference"
-                    value={
-                      form.reference
-                    }
-                    onChange={
-                      handleChange
-                    }
-                    placeholder="Attendance Bot"
-                  />
-                </div>
-
-              </div>
+                  <option value="Other">
+                    Other
+                  </option>
+                </select>
+              </label>
 
 
-              <div className="form-group">
+              <label>
+                Date
 
-                <label>Note</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                />
+              </label>
+
+
+              <label>
+                Minutes
+
+                <input
+                  type="number"
+                  min="0"
+                  name="minutes"
+                  value={
+                    formData.minutes
+                  }
+                  onChange={handleChange}
+                  placeholder="Optional"
+                />
+              </label>
+
+
+              <label>
+                Reference
+
+                <input
+                  type="text"
+                  name="reference"
+                  value={
+                    formData.reference
+                  }
+                  onChange={handleChange}
+                  placeholder="Optional reference"
+                />
+              </label>
+
+
+              <label>
+                Note
 
                 <textarea
                   name="note"
-                  value={form.note}
+                  value={formData.note}
                   onChange={handleChange}
-                  placeholder="Add context or supervisor notes..."
+                  placeholder="Attendance details"
                   required
                 />
-
-              </div>
-
-
-              {formError && (
-                <div className="form-error">
-                  {formError}
-                </div>
-              )}
+              </label>
 
 
               <div className="modal-actions">
@@ -550,6 +627,7 @@ function Attendance() {
                   onClick={() =>
                     setShowModal(false)
                   }
+                  disabled={saving}
                 >
                   Cancel
                 </button>
@@ -562,7 +640,7 @@ function Attendance() {
                 >
                   {saving
                     ? "Saving..."
-                    : "Add Record"}
+                    : "Save Record"}
                 </button>
 
               </div>
@@ -572,7 +650,9 @@ function Attendance() {
           </div>
 
         </div>
+
       )}
+
     </>
   );
 }

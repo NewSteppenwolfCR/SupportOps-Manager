@@ -5,6 +5,7 @@ import {
 
 import {
   createFollowUp,
+  deleteFollowUp,
   getAgents,
   getFollowUps,
   updateFollowUpStatus,
@@ -159,6 +160,34 @@ function FollowUps() {
     }
   }
 
+    async function handleDeleteFollowUp(
+    record
+  ) {
+    const confirmed = window.confirm(
+      `Delete follow-up "${record.title}" for ${record.agent_name}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setProcessingId(record.id);
+      setError("");
+
+      await deleteFollowUp(
+        record.id
+      );
+
+      await loadData();
+
+    } catch (error) {
+      setError(error.message);
+
+    } finally {
+      setProcessingId(null);
+    }
+  }
 
   const openCount = records.filter(
     (record) =>
@@ -377,51 +406,74 @@ function FollowUps() {
                           }
                         </td>
 
-                        <td>
+                                                <td>
 
-                          {record.status ===
-                          "Open" ? (
-                            <div className="overtime-actions">
+                          <div className="overtime-actions">
 
-                              <button
-                                className="approve-button"
-                                disabled={
-                                  processingId ===
-                                  record.id
-                                }
-                                onClick={() =>
-                                  handleStatusChange(
-                                    record,
-                                    "Completed"
-                                  )
-                                }
-                              >
-                                Complete
-                              </button>
+                            {record.status ===
+                            "Open" && (
+                              <>
+                                <button
+                                  className="approve-button"
+                                  disabled={
+                                    processingId ===
+                                    record.id
+                                  }
+                                  onClick={() =>
+                                    handleStatusChange(
+                                      record,
+                                      "Completed"
+                                    )
+                                  }
+                                >
+                                  Complete
+                                </button>
 
 
-                              <button
-                                className="reject-button"
-                                disabled={
-                                  processingId ===
-                                  record.id
-                                }
-                                onClick={() =>
-                                  handleStatusChange(
-                                    record,
-                                    "Cancelled"
-                                  )
-                                }
-                              >
-                                Cancel
-                              </button>
+                                <button
+                                  className="reject-button"
+                                  disabled={
+                                    processingId ===
+                                    record.id
+                                  }
+                                  onClick={() =>
+                                    handleStatusChange(
+                                      record,
+                                      "Cancelled"
+                                    )
+                                  }
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            )}
 
-                            </div>
-                          ) : (
-                            <span className="decision-complete">
-                              Closed
-                            </span>
-                          )}
+
+                            {record.status !==
+                              "Open" && (
+                              <span className="decision-complete">
+                                Closed
+                              </span>
+                            )}
+
+
+                            <button
+                              type="button"
+                              className="danger-button"
+                              disabled={
+                                processingId ===
+                                record.id
+                              }
+                              onClick={() =>
+                                handleDeleteFollowUp(
+                                  record
+                                )
+                              }
+                            >
+                              Delete
+                            </button>
+
+                          </div>
 
                         </td>
 

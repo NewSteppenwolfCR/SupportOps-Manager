@@ -34,7 +34,9 @@ class AttendanceCreate(BaseModel):
     note: str
 
 
-def serialize_record(record: models.AttendanceRecord):
+def serialize_record(
+    record: models.AttendanceRecord,
+):
     return {
         "id": record.id,
         "agent_id": record.agent_id,
@@ -47,7 +49,8 @@ def serialize_record(record: models.AttendanceRecord):
         "minutes": record.minutes,
         "reference": record.reference,
         "note": record.note,
-        "created_by_admin_id": record.created_by_admin_id,
+        "created_by_admin_id":
+            record.created_by_admin_id,
         "created_by_admin": (
             f"{record.created_by_admin.first_name} "
             f"{record.created_by_admin.last_name}"
@@ -56,6 +59,10 @@ def serialize_record(record: models.AttendanceRecord):
         "updated_at": record.updated_at,
     }
 
+
+# =========================================================
+# CREATE ATTENDANCE RECORD
+# =========================================================
 
 @router.post(
     "",
@@ -66,13 +73,19 @@ def create_attendance_record(
     current_admin=Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    if attendance.record_type not in ALLOWED_RECORD_TYPES:
+    if (
+        attendance.record_type
+        not in ALLOWED_RECORD_TYPES
+    ):
         raise HTTPException(
             status_code=400,
             detail="Invalid attendance record type",
         )
 
-    if attendance.minutes is not None and attendance.minutes < 0:
+    if (
+        attendance.minutes is not None
+        and attendance.minutes < 0
+    ):
         raise HTTPException(
             status_code=400,
             detail="Minutes cannot be negative",
@@ -86,7 +99,10 @@ def create_attendance_record(
 
     agent = (
         db.query(models.Agent)
-        .filter(models.Agent.id == attendance.agent_id)
+        .filter(
+            models.Agent.id
+            == attendance.agent_id
+        )
         .first()
     )
 
@@ -97,16 +113,24 @@ def create_attendance_record(
         )
 
     try:
-        admin_id = int(current_admin["subject"])
+        admin_id = int(
+            current_admin["subject"]
+        )
+
     except (TypeError, ValueError):
         raise HTTPException(
             status_code=401,
-            detail="Invalid administrator authentication",
+            detail=(
+                "Invalid administrator "
+                "authentication"
+            ),
         )
 
     admin = (
         db.query(models.Admin)
-        .filter(models.Admin.id == admin_id)
+        .filter(
+            models.Admin.id == admin_id
+        )
         .first()
     )
 
@@ -135,10 +159,16 @@ def create_attendance_record(
     db.refresh(record)
 
     return {
-        "message": "Attendance record created successfully",
-        "record": serialize_record(record),
+        "message":
+            "Attendance record created successfully",
+        "record":
+            serialize_record(record),
     }
 
+
+# =========================================================
+# GET ALL ATTENDANCE RECORDS
+# =========================================================
 
 @router.get("")
 def get_attendance_records(
@@ -149,7 +179,8 @@ def get_attendance_records(
         db.query(models.AttendanceRecord)
         .order_by(
             models.AttendanceRecord.date.desc(),
-            models.AttendanceRecord.created_at.desc(),
+            models.AttendanceRecord
+            .created_at.desc(),
         )
         .all()
     )
@@ -163,6 +194,10 @@ def get_attendance_records(
     }
 
 
+# =========================================================
+# GET AGENT ATTENDANCE
+# =========================================================
+
 @router.get("/agent/{agent_id}")
 def get_agent_attendance(
     agent_id: int,
@@ -171,7 +206,9 @@ def get_agent_attendance(
 ):
     agent = (
         db.query(models.Agent)
-        .filter(models.Agent.id == agent_id)
+        .filter(
+            models.Agent.id == agent_id
+        )
         .first()
     )
 
@@ -184,11 +221,13 @@ def get_agent_attendance(
     records = (
         db.query(models.AttendanceRecord)
         .filter(
-            models.AttendanceRecord.agent_id == agent_id
+            models.AttendanceRecord.agent_id
+            == agent_id
         )
         .order_by(
             models.AttendanceRecord.date.desc(),
-            models.AttendanceRecord.created_at.desc(),
+            models.AttendanceRecord
+            .created_at.desc(),
         )
         .all()
     )
@@ -222,4 +261,40 @@ def get_agent_attendance(
             serialize_record(record)
             for record in records
         ],
+    }
+
+
+# =========================================================
+# DELETE ATTENDANCE RECORD
+# =========================================================
+
+@router.delete("/{record_id}")
+def delete_attendance_record(
+    record_id: int,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    record = (
+        db.query(models.AttendanceRecord)
+        .filter(
+            models.AttendanceRecord.id
+            == record_id
+        )
+        .first()
+    )
+
+    if not record:
+        raise HTTPException(
+            status_code=404,
+            detail="Attendance record not found",
+        )
+
+    db.delete(record)
+    db.commit()
+
+    return {
+        "message":
+            "Attendance record deleted successfully",
+        "record_id":
+            record_id,
     }

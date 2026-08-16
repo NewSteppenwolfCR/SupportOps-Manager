@@ -5,10 +5,10 @@ import {
 
 import {
   createTimeOffRecord,
+  deleteTimeOffRecord,
   getAgents,
   getTimeOffRecords,
 } from "../services/api";
-
 
 function Vacations() {
   const [records, setRecords] = useState([]);
@@ -144,7 +144,30 @@ function Vacations() {
       setSaving(false);
     }
   }
+  async function handleDeleteRecord(
+    record
+  ) {
+    const confirmed = window.confirm(
+      `Delete this ${record.leave_type} record for ${record.agent_name}?`
+    );
 
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+
+      await deleteTimeOffRecord(
+        record.id
+      );
+
+      await loadData();
+
+    } catch (error) {
+      setError(error.message);
+    }
+  }
 
   const vacationDays =
     records
@@ -349,6 +372,7 @@ function Vacations() {
                     <th>Reference</th>
                     <th>Note</th>
                     <th>Created By</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
 
@@ -406,6 +430,19 @@ function Vacations() {
                         </td>
 
                         <td>
+                                                  <td>
+                          <button
+                            type="button"
+                            className="danger-button"
+                            onClick={() =>
+                              handleDeleteRecord(
+                                record
+                              )
+                            }
+                          >
+                            Delete
+                          </button>
+                        </td>
                           {
                             record.created_by_admin
                           }

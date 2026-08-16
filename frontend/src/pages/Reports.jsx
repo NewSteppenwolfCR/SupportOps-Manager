@@ -5,6 +5,7 @@ import {
 
 import {
   createReport,
+  deleteReport,
   downloadReportAttachment,
   getAgents,
   getReports,
@@ -202,6 +203,30 @@ function Reports() {
     }
   }
 
+    async function handleDeleteReport(
+    report
+  ) {
+    const confirmed = window.confirm(
+      `Delete report "${report.title}" for ${report.agent_name}? This will also delete its attachments.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+
+      await deleteReport(
+        report.id
+      );
+
+      await loadData();
+
+    } catch (error) {
+      setError(error.message);
+    }
+  }
 
   const attachmentCount =
     reports.reduce(
@@ -375,6 +400,7 @@ function Reports() {
                     <th>Note</th>
                     <th>Files</th>
                     <th>Created By</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
 
@@ -445,12 +471,26 @@ function Reports() {
                         </td>
 
                         <td>
-                          {
-                            report.created_by_admin
-                          }
+                         {
+                           report.created_by_admin
+                                                 }
                         </td>
 
-                      </tr>
+                        <td>
+                            <button
+                             type="button"
+                             className="danger-button"
+                             onClick={() =>
+                                handleDeleteReport(
+                                               report
+                                                      )
+                                 }
+                                 >
+                                      Delete
+                                   </button>
+                                    </td>
+
+                                               </tr>
                     )
                   )}
 

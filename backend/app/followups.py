@@ -74,6 +74,10 @@ def serialize_followup(
     }
 
 
+# =========================================================
+# CREATE FOLLOW-UP
+# =========================================================
+
 @router.post(
     "",
     status_code=status.HTTP_201_CREATED,
@@ -104,7 +108,8 @@ def create_followup(
     agent = (
         db.query(models.Agent)
         .filter(
-            models.Agent.id == followup.agent_id
+            models.Agent.id
+            == followup.agent_id
         )
         .first()
     )
@@ -119,6 +124,7 @@ def create_followup(
         admin_id = int(
             current_admin["subject"]
         )
+
     except (TypeError, ValueError):
         raise HTTPException(
             status_code=401,
@@ -158,14 +164,16 @@ def create_followup(
     db.refresh(record)
 
     return {
-        "message": (
-            "Follow-up created successfully"
-        ),
-        "record": serialize_followup(
-            record
-        ),
+        "message":
+            "Follow-up created successfully",
+        "record":
+            serialize_followup(record),
     }
 
+
+# =========================================================
+# GET ALL FOLLOW-UPS
+# =========================================================
 
 @router.get("")
 def get_followups(
@@ -176,7 +184,8 @@ def get_followups(
         db.query(models.FollowUpRecord)
         .order_by(
             models.FollowUpRecord.date.desc(),
-            models.FollowUpRecord.created_at.desc(),
+            models.FollowUpRecord
+            .created_at.desc(),
         )
         .all()
     )
@@ -189,6 +198,10 @@ def get_followups(
         ],
     }
 
+
+# =========================================================
+# GET AGENT FOLLOW-UPS
+# =========================================================
 
 @router.get("/agent/{agent_id}")
 def get_agent_followups(
@@ -218,7 +231,8 @@ def get_agent_followups(
         )
         .order_by(
             models.FollowUpRecord.date.desc(),
-            models.FollowUpRecord.created_at.desc(),
+            models.FollowUpRecord
+            .created_at.desc(),
         )
         .all()
     )
@@ -262,6 +276,10 @@ def get_agent_followups(
     }
 
 
+# =========================================================
+# UPDATE FOLLOW-UP STATUS
+# =========================================================
+
 @router.patch(
     "/{followup_id}/status"
 )
@@ -292,7 +310,6 @@ def update_followup_status(
             detail="Follow-up not found",
         )
 
-    # A closed follow-up cannot be changed again.
     if record.status != "Open":
         raise HTTPException(
             status_code=409,
@@ -302,8 +319,6 @@ def update_followup_status(
             ),
         )
 
-    # An open record can only move to
-    # Completed or Cancelled.
     if update.status == "Open":
         raise HTTPException(
             status_code=400,
@@ -323,7 +338,42 @@ def update_followup_status(
             "Follow-up status updated "
             "successfully"
         ),
-        "record": serialize_followup(
-            record
-        ),
+        "record":
+            serialize_followup(record),
+    }
+
+
+# =========================================================
+# DELETE FOLLOW-UP
+# =========================================================
+
+@router.delete("/{followup_id}")
+def delete_followup(
+    followup_id: int,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    record = (
+        db.query(models.FollowUpRecord)
+        .filter(
+            models.FollowUpRecord.id
+            == followup_id
+        )
+        .first()
+    )
+
+    if not record:
+        raise HTTPException(
+            status_code=404,
+            detail="Follow-up not found",
+        )
+
+    db.delete(record)
+    db.commit()
+
+    return {
+        "message":
+            "Follow-up deleted successfully",
+        "followup_id":
+            followup_id,
     }

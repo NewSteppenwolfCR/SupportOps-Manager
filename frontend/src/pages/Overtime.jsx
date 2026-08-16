@@ -7,6 +7,7 @@ import {
   getOvertimeRequests,
   approveOvertime,
   rejectOvertime,
+  deleteOvertime,
 } from "../services/api";
 
 
@@ -117,6 +118,34 @@ function Overtime() {
     }
   };
 
+    const handleDelete = async (
+    request
+  ) => {
+    const confirmed = window.confirm(
+      `Delete this overtime request for ${request.agent_name} on ${request.date}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setProcessingId(request.id);
+      setError("");
+
+      await deleteOvertime(
+        request.id
+      );
+
+      await loadOvertime();
+
+    } catch (err) {
+      setError(err.message);
+
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   const agentOptions = [
     ...new Set(
@@ -661,9 +690,70 @@ function Overtime() {
                       Status
                     </th>
 
-                    <th>
-                      Actions
-                    </th>
+                                            <td>
+
+                          <div className="overtime-actions">
+
+                            {request.status ===
+                            "Pending" ? (
+                              <>
+                                <button
+                                  className="approve-button"
+                                  disabled={
+                                    processingId ===
+                                    request.id
+                                  }
+                                  onClick={() =>
+                                    handleApprove(
+                                      request
+                                    )
+                                  }
+                                >
+                                  Approve
+                                </button>
+
+
+                                <button
+                                  className="reject-button"
+                                  disabled={
+                                    processingId ===
+                                    request.id
+                                  }
+                                  onClick={() =>
+                                    handleReject(
+                                      request
+                                    )
+                                  }
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            ) : (
+                              <span className="decision-complete">
+                                Reviewed
+                              </span>
+                            )}
+
+
+                            <button
+                              type="button"
+                              className="danger-button"
+                              disabled={
+                                processingId ===
+                                request.id
+                              }
+                              onClick={() =>
+                                handleDelete(
+                                  request
+                                )
+                              }
+                            >
+                              Delete
+                            </button>
+
+                          </div>
+
+                        </td>
                   </tr>
                 </thead>
 

@@ -79,6 +79,10 @@ def serialize_timeoff(
     }
 
 
+# =========================================================
+# CREATE TIME OFF RECORD
+# =========================================================
+
 @router.post(
     "",
     status_code=status.HTTP_201_CREATED,
@@ -97,7 +101,8 @@ def create_timeoff_record(
     agent = (
         db.query(models.Agent)
         .filter(
-            models.Agent.id == timeoff.agent_id
+            models.Agent.id
+            == timeoff.agent_id
         )
         .first()
     )
@@ -116,7 +121,10 @@ def create_timeoff_record(
     except (TypeError, ValueError):
         raise HTTPException(
             status_code=401,
-            detail="Invalid administrator authentication",
+            detail=(
+                "Invalid administrator "
+                "authentication"
+            ),
         )
 
     admin = (
@@ -162,10 +170,16 @@ def create_timeoff_record(
     db.refresh(record)
 
     return {
-        "message": "Time off record created successfully",
-        "record": serialize_timeoff(record),
+        "message":
+            "Time off record created successfully",
+        "record":
+            serialize_timeoff(record),
     }
 
+
+# =========================================================
+# GET ALL TIME OFF RECORDS
+# =========================================================
 
 @router.get("")
 def get_timeoff_records(
@@ -175,8 +189,10 @@ def get_timeoff_records(
     records = (
         db.query(models.TimeOffRecord)
         .order_by(
-            models.TimeOffRecord.start_date.desc(),
-            models.TimeOffRecord.created_at.desc(),
+            models.TimeOffRecord
+            .start_date.desc(),
+            models.TimeOffRecord
+            .created_at.desc(),
         )
         .all()
     )
@@ -189,6 +205,10 @@ def get_timeoff_records(
         ],
     }
 
+
+# =========================================================
+# GET AGENT TIME OFF
+# =========================================================
 
 @router.get("/agent/{agent_id}")
 def get_agent_timeoff(
@@ -217,8 +237,10 @@ def get_agent_timeoff(
             == agent_id
         )
         .order_by(
-            models.TimeOffRecord.start_date.desc(),
-            models.TimeOffRecord.created_at.desc(),
+            models.TimeOffRecord
+            .start_date.desc(),
+            models.TimeOffRecord
+            .created_at.desc(),
         )
         .all()
     )
@@ -258,4 +280,40 @@ def get_agent_timeoff(
             serialize_timeoff(record)
             for record in records
         ],
+    }
+
+
+# =========================================================
+# DELETE TIME OFF RECORD
+# =========================================================
+
+@router.delete("/{record_id}")
+def delete_timeoff_record(
+    record_id: int,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    record = (
+        db.query(models.TimeOffRecord)
+        .filter(
+            models.TimeOffRecord.id
+            == record_id
+        )
+        .first()
+    )
+
+    if not record:
+        raise HTTPException(
+            status_code=404,
+            detail="Time off record not found",
+        )
+
+    db.delete(record)
+    db.commit()
+
+    return {
+        "message":
+            "Time off record deleted successfully",
+        "record_id":
+            record_id,
     }
