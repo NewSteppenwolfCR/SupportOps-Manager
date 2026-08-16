@@ -61,6 +61,8 @@ class AgentCreate(BaseModel):
     schedule: str
     status: str = "Active"
 
+class AgentStatusUpdate(BaseModel):
+    status: str
 
 class AgentAccess(BaseModel):
     access_code: str
@@ -270,7 +272,168 @@ def get_agent(
         "status": agent.status,
     }
 
+# =========================================================
+# AGENT STATUS - ADMIN ONLY
+# =========================================================
 
+@app.patch("/agents/{agent_id}/status")
+def update_agent_status(
+    agent_id: int,
+    update: AgentStatusUpdate,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    allowed_statuses = {
+        "Active",
+        "Inactive",
+    }
+
+    if update.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid agent status",
+        )
+
+    agent = (
+        db.query(models.Agent)
+        .filter(
+            models.Agent.id == agent_id
+        )
+        .first()
+    )
+
+    if not agent:
+        raise HTTPException(
+            status_code=404,
+            detail="Agent not found",
+        )
+
+    agent.status = update.status
+
+    db.commit()
+    db.refresh(agent)
+
+    return {
+        "message": (
+            f"Agent status updated "
+            f"to {agent.status}"
+        ),
+        "agent": {
+            "id": agent.id,
+            "first_name": agent.first_name,
+            "last_name": agent.last_name,
+            "email": agent.email,
+            "schedule": agent.schedule,
+            "status": agent.status,
+        },
+    }
+
+
+# =========================================================
+# DELETE AGENT - ADMIN ONLY
+# =========================================================
+
+@app.delete("/agents/{agent_id}")
+def delete_agent(
+    agent_id: int,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    agent = (
+        db.query(models.Agent)
+        .filter(
+            models.Agent.id == agent_id
+        )
+        .first()
+    )
+
+    if not agent:
+        raise HTTPException(
+            status_code=404,
+            detail="Agent not found",
+        )
+
+    overtime_count = (
+        db.query(models.OvertimeRequest)
+        .filter(
+            models.OvertimeRequest.agent_id
+            == agent_id
+        )
+        .count()
+    )
+
+    attendance_count = (
+        db.query(models.AttendanceRecord)
+        .filter(
+            models.AttendanceRecord.agent_id
+            == agent_id
+        )
+        .count()
+    )
+
+    followup_count = (
+        db.query(models.FollowUpRecord)
+        .filter(
+            models.FollowUpRecord.agent_id
+            == agent_id
+        )
+        .count()
+    )
+
+    timeoff_count = (
+        db.query(models.TimeOffRecord)
+        .filter(
+            models.TimeOffRecord.agent_id
+            == agent_id
+        )
+        .count()
+    )
+
+    report_count = (
+        db.query(models.ReportRecord)
+        .filter(
+            models.ReportRecord.agent_id
+            == agent_id
+        )
+        .count()
+    )
+
+    total_records = (
+        overtime_count
+        + attendance_count
+        + followup_count
+        + timeoff_count
+        + report_count
+    )
+
+    if total_records > 0:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": (
+                    "Agent cannot be permanently "
+                    "deleted because historical "
+                    "records exist"
+                ),
+                "records": {
+                    "overtime": overtime_count,
+                    "attendance": attendance_count,
+                    "followups": followup_count,
+                    "time_off": timeoff_count,
+                    "reports": report_count,
+                },
+            },
+        )
+
+    db.delete(agent)
+    db.commit()
+
+    return {
+        "message": (
+            "Agent permanently deleted"
+        ),
+        "agent_id": agent_id,
+    }
 # =========================================================
 # AGENT ACCESS CODE - ADMIN ONLY
 # =========================================================

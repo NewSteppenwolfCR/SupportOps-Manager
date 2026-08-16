@@ -266,6 +266,63 @@ export async function generateAgentAccessCode(
   return data;
 }
 
+  export async function updateAgentStatus(
+  agentId,
+  status
+) {
+  const response = await adminFetch(
+    `${API_URL}/agents/${agentId}/status`,
+    {
+      method: "PATCH",
+      headers: getAdminHeaders(),
+      body: JSON.stringify({
+        status,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not update agent status"
+      )
+    );
+  }
+
+  return data;
+}
+
+
+export async function deleteAgent(
+  agentId
+) {
+  const response = await adminFetch(
+    `${API_URL}/agents/${agentId}`,
+    {
+      method: "DELETE",
+      headers: getAdminHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not delete agent"
+      )
+    );
+  }
+
+  return data;
+}
+
+
+
 
 // =========================================================
 // ADMIN OVERTIME

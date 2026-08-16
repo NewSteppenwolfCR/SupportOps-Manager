@@ -4,6 +4,7 @@ import {
 } from "react";
 
 import {
+  deleteAgent,
   downloadReportAttachment,
   generateAgentAccessCode,
   getAgent,
@@ -12,6 +13,7 @@ import {
   getAgentOvertime,
   getAgentReports,
   getAgentTimeOff,
+  updateAgentStatus,
 } from "../services/api";
 
 
@@ -218,6 +220,78 @@ function AgentProfile({
     }
   }
 
+  async function handleToggleAgentStatus() {
+  if (!agent) {
+    return;
+  }
+
+  const newStatus =
+    agent.status === "Active"
+      ? "Inactive"
+      : "Active";
+
+  const action =
+    newStatus === "Inactive"
+      ? "deactivate"
+      : "reactivate";
+
+  const confirmed = window.confirm(
+    `Are you sure you want to ${action} ${agent.first_name} ${agent.last_name}?`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    setError("");
+
+    const data = await updateAgentStatus(
+      agent.id,
+      newStatus
+    );
+
+    setAgent(data.agent);
+
+  } catch (error) {
+    setError(error.message);
+  }
+}
+
+
+async function handleDeleteAgent() {
+  if (!agent) {
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Permanently delete ${agent.first_name} ${agent.last_name}? This is only allowed if the agent has no historical records.`
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const finalConfirmation = window.confirm(
+    "This action cannot be undone. Continue?"
+  );
+
+  if (!finalConfirmation) {
+    return;
+  }
+
+  try {
+    setError("");
+
+    await deleteAgent(agent.id);
+
+    onBack();
+
+  } catch (error) {
+    setError(error.message);
+  }
+}
+
 
   if (loading) {
     return (
@@ -323,27 +397,57 @@ function AgentProfile({
 
         <div className="profile-access-actions">
 
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={
-              handleGenerateAccessCode
-            }
-            disabled={generatingCode}
-          >
-            {generatingCode
-              ? "Generating..."
-              : "Generate Access Code"}
-          </button>
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={
+      handleGenerateAccessCode
+    }
+    disabled={generatingCode}
+  >
+    {generatingCode
+      ? "Generating..."
+      : "Generate Access Code"}
+  </button>
 
 
-          {accessCodeError && (
-            <span className="access-code-error">
-              {accessCodeError}
-            </span>
-          )}
+  <button
+    type="button"
+    className={
+      agent.status === "Active"
+        ? "secondary-button"
+        : "primary-button"
+    }
+    onClick={
+      handleToggleAgentStatus
+    }
+  >
+    {agent.status === "Active"
+      ? "Deactivate Agent"
+      : "Reactivate Agent"}
+  </button>
 
-        </div>
+
+  {agent.status === "Inactive" && (
+    <button
+      type="button"
+      className="danger-button"
+      onClick={
+        handleDeleteAgent
+      }
+    >
+      Delete Permanently
+    </button>
+  )}
+
+
+  {accessCodeError && (
+    <span className="access-code-error">
+      {accessCodeError}
+    </span>
+  )}
+
+</div>
 
       </header>
 
