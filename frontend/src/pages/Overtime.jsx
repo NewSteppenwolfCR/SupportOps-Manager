@@ -764,53 +764,68 @@ function Overtime() {
                         </td>
 
 
-                        <td>
+                                                <td>
 
-                          {request.status ===
-                          "Pending" ? (
+                          <div className="overtime-actions">
 
-                            <div className="overtime-actions">
+                            {request.status ===
+                            "Pending" ? (
+                              <>
+                                <button
+                                  className="approve-button"
+                                  disabled={
+                                    processingId ===
+                                    request.id
+                                  }
+                                  onClick={() =>
+                                    handleApprove(
+                                      request
+                                    )
+                                  }
+                                >
+                                  Approve
+                                </button>
 
-                              <button
-                                className="approve-button"
-                                disabled={
-                                  processingId ===
-                                  request.id
-                                }
-                                onClick={() =>
-                                  handleApprove(
-                                    request
-                                  )
-                                }
-                              >
-                                Approve
-                              </button>
+
+                                <button
+                                  className="reject-button"
+                                  disabled={
+                                    processingId ===
+                                    request.id
+                                  }
+                                  onClick={() =>
+                                    handleReject(
+                                      request
+                                    )
+                                  }
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            ) : (
+                              <span className="decision-complete">
+                                Reviewed
+                              </span>
+                            )}
 
 
-                              <button
-                                className="reject-button"
-                                disabled={
-                                  processingId ===
-                                  request.id
-                                }
-                                onClick={() =>
-                                  handleReject(
-                                    request
-                                  )
-                                }
-                              >
-                                Reject
-                              </button>
+                            <button
+                              type="button"
+                              className="danger-button"
+                              disabled={
+                                processingId ===
+                                request.id
+                              }
+                              onClick={() =>
+                                handleDelete(
+                                  request
+                                )
+                              }
+                            >
+                              Delete
+                            </button>
 
-                            </div>
-
-                          ) : (
-
-                            <span className="decision-complete">
-                              Reviewed
-                            </span>
-
-                          )}
+                          </div>
 
                         </td>
 
