@@ -4,7 +4,6 @@ import {
 } from "react";
 
 import {
-  changeAdminPassword,
   createAdmin,
   deleteAdmin,
   getAdmins,
@@ -43,31 +42,6 @@ function Administrators({
     password: "",
     confirm_password: "",
   });
-
-
-  const [
-    passwordForm,
-    setPasswordForm,
-  ] = useState({
-    current_password: "",
-    new_password: "",
-    confirm_password: "",
-  });
-
-  const [
-    passwordMessage,
-    setPasswordMessage,
-  ] = useState("");
-
-  const [
-    passwordError,
-    setPasswordError,
-  ] = useState("");
-
-  const [
-    changingPassword,
-    setChangingPassword,
-  ] = useState(false);
 
 
   async function loadAdmins() {
@@ -251,81 +225,16 @@ function Administrators({
   }
 
 
-  function handlePasswordChange(event) {
-    const {
-      name,
-      value,
-    } = event.target;
-
-    setPasswordForm(
-      (current) => ({
-        ...current,
-        [name]: value,
-      })
-    );
-  }
-
-
-  async function handleChangePassword(
-    event
-  ) {
-    event.preventDefault();
-
-    try {
-      setChangingPassword(true);
-      setPasswordError("");
-      setPasswordMessage("");
-
-      if (
-        passwordForm.new_password !==
-        passwordForm.confirm_password
-      ) {
-        throw new Error(
-          "New passwords do not match"
-        );
-      }
-
-      if (
-        passwordForm.new_password.length <
-        10
-      ) {
-        throw new Error(
-          "New password must contain at least 10 characters"
-        );
-      }
-
-      const data =
-        await changeAdminPassword(
-          passwordForm.current_password,
-          passwordForm.new_password
-        );
-
-      setPasswordMessage(
-        data.message ||
-          "Password changed successfully"
-      );
-
-      setPasswordForm({
-        current_password: "",
-        new_password: "",
-        confirm_password: "",
-      });
-
-    } catch (error) {
-      setPasswordError(
-        error.message
-      );
-
-    } finally {
-      setChangingPassword(false);
-    }
-  }
-
-
   const activeAdmins =
     admins.filter(
       (admin) =>
         admin.status === "Active"
+    ).length;
+
+  const inactiveAdmins =
+    admins.filter(
+      (admin) =>
+        admin.status === "Inactive"
     ).length;
 
 
@@ -337,8 +246,8 @@ function Administrators({
           <h2>Administrators</h2>
 
           <p>
-            Manage administrator access
-            and account security
+            Manage administrator accounts
+            and system access
           </p>
         </div>
 
@@ -392,22 +301,41 @@ function Administrators({
           </small>
         </div>
 
+
+        <div className="stat-card">
+          <span className="stat-label">
+            Inactive
+          </span>
+
+          <strong>
+            {loading
+              ? "..."
+              : inactiveAdmins}
+          </strong>
+
+          <small>
+            Disabled administrator accounts
+          </small>
+        </div>
+
       </section>
 
 
       <section className="content-card">
 
         <div className="section-header">
+
           <div>
             <h3>
               Administrator Accounts
             </h3>
 
             <p>
-              Manage access to SupportOps
-              Manager
+              Create, activate, deactivate,
+              or remove administrator access
             </p>
           </div>
+
         </div>
 
 
@@ -428,9 +356,11 @@ function Administrators({
         {!loading &&
           !error &&
           admins.length === 0 && (
+
             <p className="message">
               No administrators found.
             </p>
+
           )}
 
 
@@ -441,6 +371,7 @@ function Administrators({
             <div className="table-wrapper">
 
               <table>
+
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -451,6 +382,7 @@ function Administrators({
                   </tr>
                 </thead>
 
+
                 <tbody>
 
                   {admins.map(
@@ -459,6 +391,7 @@ function Administrators({
                       <tr key={admin.id}>
 
                         <td>
+
                           <strong>
                             {admin.first_name}{" "}
                             {admin.last_name}
@@ -466,10 +399,13 @@ function Administrators({
 
                           {admin.id ===
                             currentAdmin?.id && (
+
                             <span>
                               {" "} (You)
                             </span>
+
                           )}
+
                         </td>
 
 
@@ -479,6 +415,7 @@ function Administrators({
 
 
                         <td>
+
                           <span
                             className={
                               admin.status ===
@@ -489,15 +426,18 @@ function Administrators({
                           >
                             {admin.status}
                           </span>
+
                         </td>
 
 
                         <td>
+
                           {admin.created_at
                             ? new Date(
                                 admin.created_at
                               ).toLocaleDateString()
                             : "—"}
+
                         </td>
 
 
@@ -532,10 +472,13 @@ function Administrators({
                                   )
                                 }
                               >
-                                {admin.status ===
-                                "Active"
-                                  ? "Deactivate"
-                                  : "Reactivate"}
+                                {processingId ===
+                                admin.id
+                                  ? "Processing..."
+                                  : admin.status ===
+                                    "Active"
+                                    ? "Deactivate"
+                                    : "Reactivate"}
                               </button>
 
 
@@ -567,135 +510,17 @@ function Administrators({
                         </td>
 
                       </tr>
+
                     )
                   )}
 
                 </tbody>
+
               </table>
 
             </div>
+
           )}
-
-      </section>
-
-
-      <section className="content-card">
-
-        <div className="section-header">
-          <div>
-            <h3>
-              Change My Password
-            </h3>
-
-            <p>
-              Update the password for your
-              administrator account
-            </p>
-          </div>
-        </div>
-
-
-        <form
-          className="agent-form"
-          onSubmit={
-            handleChangePassword
-          }
-        >
-
-          <div className="form-group">
-            <label>
-              Current Password
-            </label>
-
-            <input
-              type="password"
-              name="current_password"
-              value={
-                passwordForm.current_password
-              }
-              onChange={
-                handlePasswordChange
-              }
-              required
-            />
-          </div>
-
-
-          <div className="form-row">
-
-            <div className="form-group">
-              <label>
-                New Password
-              </label>
-
-              <input
-                type="password"
-                name="new_password"
-                value={
-                  passwordForm.new_password
-                }
-                onChange={
-                  handlePasswordChange
-                }
-                minLength="10"
-                required
-              />
-            </div>
-
-
-            <div className="form-group">
-              <label>
-                Confirm New Password
-              </label>
-
-              <input
-                type="password"
-                name="confirm_password"
-                value={
-                  passwordForm.confirm_password
-                }
-                onChange={
-                  handlePasswordChange
-                }
-                minLength="10"
-                required
-              />
-            </div>
-
-          </div>
-
-
-          {passwordError && (
-            <div className="form-error">
-              {passwordError}
-            </div>
-          )}
-
-
-          {passwordMessage && (
-            <p className="message">
-              {passwordMessage}
-            </p>
-          )}
-
-
-          <div className="modal-actions">
-
-            <button
-              type="submit"
-              className="primary-button"
-              disabled={
-                changingPassword
-              }
-            >
-              {changingPassword
-                ? "Changing..."
-                : "Change Password"}
-            </button>
-
-          </div>
-
-        </form>
 
       </section>
 
@@ -719,6 +544,7 @@ function Administrators({
             <div className="modal-header">
 
               <div>
+
                 <h3>
                   Add Administrator
                 </h3>
@@ -727,6 +553,7 @@ function Administrators({
                   Create a new SupportOps
                   administrator account.
                 </p>
+
               </div>
 
 
@@ -753,6 +580,7 @@ function Administrators({
               <div className="form-row">
 
                 <div className="form-group">
+
                   <label>
                     First Name
                   </label>
@@ -768,10 +596,12 @@ function Administrators({
                     }
                     required
                   />
+
                 </div>
 
 
                 <div className="form-group">
+
                   <label>
                     Last Name
                   </label>
@@ -787,30 +617,40 @@ function Administrators({
                     }
                     required
                   />
+
                 </div>
 
               </div>
 
 
               <div className="form-group">
-                <label>Email</label>
+
+                <label>
+                  Email
+                </label>
 
                 <input
                   type="email"
                   name="email"
-                  value={form.email}
+                  value={
+                    form.email
+                  }
                   onChange={
                     handleCreateChange
                   }
                   required
                 />
+
               </div>
 
 
               <div className="form-row">
 
                 <div className="form-group">
-                  <label>Password</label>
+
+                  <label>
+                    Password
+                  </label>
 
                   <input
                     type="password"
@@ -824,10 +664,12 @@ function Administrators({
                     minLength="10"
                     required
                   />
+
                 </div>
 
 
                 <div className="form-group">
+
                   <label>
                     Confirm Password
                   </label>
@@ -844,15 +686,18 @@ function Administrators({
                     minLength="10"
                     required
                   />
+
                 </div>
 
               </div>
 
 
               {formError && (
+
                 <div className="form-error">
                   {formError}
                 </div>
+
               )}
 
 
@@ -861,9 +706,10 @@ function Administrators({
                 <button
                   type="button"
                   className="secondary-button"
-                  onClick={() =>
-                    setShowModal(false)
-                  }
+                  onClick={() => {
+                    setShowModal(false);
+                    resetCreateForm();
+                  }}
                 >
                   Cancel
                 </button>
@@ -886,6 +732,7 @@ function Administrators({
           </div>
 
         </div>
+
       )}
 
     </>
