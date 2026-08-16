@@ -6,6 +6,7 @@ import {
 import {
   changeAdminPassword,
   createAdmin,
+  deleteAdmin,
   getAdmins,
   updateAdminStatus,
 } from "../services/api";
@@ -211,6 +212,45 @@ function Administrators({
   }
 
 
+  async function handleDeleteAdmin(
+    admin
+  ) {
+    const confirmed = window.confirm(
+      `Permanently delete ${admin.first_name} ${admin.last_name}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const finalConfirmation =
+      window.confirm(
+        "This action cannot be undone. Continue?"
+      );
+
+    if (!finalConfirmation) {
+      return;
+    }
+
+    try {
+      setProcessingId(admin.id);
+      setError("");
+
+      await deleteAdmin(
+        admin.id
+      );
+
+      await loadAdmins();
+
+    } catch (error) {
+      setError(error.message);
+
+    } finally {
+      setProcessingId(null);
+    }
+  }
+
+
   function handlePasswordChange(event) {
     const {
       name,
@@ -387,6 +427,15 @@ function Administrators({
 
         {!loading &&
           !error &&
+          admins.length === 0 && (
+            <p className="message">
+              No administrators found.
+            </p>
+          )}
+
+
+        {!loading &&
+          !error &&
           admins.length > 0 && (
 
             <div className="table-wrapper">
@@ -456,33 +505,63 @@ function Administrators({
 
                           {admin.id ===
                           currentAdmin?.id ? (
+
                             <span className="decision-complete">
                               Current Account
                             </span>
+
                           ) : (
-                            <button
-                              type="button"
-                              className={
-                                admin.status ===
+
+                            <div className="overtime-actions">
+
+                              <button
+                                type="button"
+                                className={
+                                  admin.status ===
+                                  "Active"
+                                    ? "danger-button"
+                                    : "secondary-button"
+                                }
+                                disabled={
+                                  processingId ===
+                                  admin.id
+                                }
+                                onClick={() =>
+                                  handleStatusChange(
+                                    admin
+                                  )
+                                }
+                              >
+                                {admin.status ===
                                 "Active"
-                                  ? "danger-button"
-                                  : "secondary-button"
-                              }
-                              disabled={
-                                processingId ===
-                                admin.id
-                              }
-                              onClick={() =>
-                                handleStatusChange(
-                                  admin
-                                )
-                              }
-                            >
+                                  ? "Deactivate"
+                                  : "Reactivate"}
+                              </button>
+
+
                               {admin.status ===
-                              "Active"
-                                ? "Deactivate"
-                                : "Reactivate"}
-                            </button>
+                                "Inactive" && (
+
+                                <button
+                                  type="button"
+                                  className="danger-button"
+                                  disabled={
+                                    processingId ===
+                                    admin.id
+                                  }
+                                  onClick={() =>
+                                    handleDeleteAdmin(
+                                      admin
+                                    )
+                                  }
+                                >
+                                  Delete Permanently
+                                </button>
+
+                              )}
+
+                            </div>
+
                           )}
 
                         </td>

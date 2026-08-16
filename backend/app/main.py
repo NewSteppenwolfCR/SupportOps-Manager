@@ -369,6 +369,127 @@ def update_admin_status(
         },
     }
 
+@app.delete("/admins/{admin_id}")
+def delete_admin(
+    admin_id: int,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    try:
+        current_admin_id = int(
+            current_admin["subject"]
+        )
+
+    except (TypeError, ValueError):
+        raise HTTPException(
+            status_code=401,
+            detail=(
+                "Invalid administrator "
+                "authentication"
+            ),
+        )
+
+    if admin_id == current_admin_id:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "You cannot permanently delete "
+                "your own administrator account"
+            ),
+        )
+
+    admin = (
+        db.query(models.Admin)
+        .filter(
+            models.Admin.id == admin_id
+        )
+        .first()
+    )
+
+    if not admin:
+        raise HTTPException(
+            status_code=404,
+            detail="Administrator not found",
+        )
+
+    attendance_count = (
+        db.query(models.AttendanceRecord)
+        .filter(
+            models.AttendanceRecord
+            .created_by_admin_id
+            == admin_id
+        )
+        .count()
+    )
+
+    followup_count = (
+        db.query(models.FollowUpRecord)
+        .filter(
+            models.FollowUpRecord
+            .created_by_admin_id
+            == admin_id
+        )
+        .count()
+    )
+
+    timeoff_count = (
+        db.query(models.TimeOffRecord)
+        .filter(
+            models.TimeOffRecord
+            .created_by_admin_id
+            == admin_id
+        )
+        .count()
+    )
+
+    report_count = (
+        db.query(models.ReportRecord)
+        .filter(
+            models.ReportRecord
+            .created_by_admin_id
+            == admin_id
+        )
+        .count()
+    )
+
+    total_records = (
+        attendance_count
+        + followup_count
+        + timeoff_count
+        + report_count
+    )
+
+    if total_records > 0:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": (
+                    "Administrator cannot be "
+                    "permanently deleted because "
+                    "historical records exist"
+                ),
+                "records": {
+                    "attendance":
+                        attendance_count,
+                    "followups":
+                        followup_count,
+                    "time_off":
+                        timeoff_count,
+                    "reports":
+                        report_count,
+                },
+            },
+        )
+
+    db.delete(admin)
+    db.commit()
+
+    return {
+        "message":
+            "Administrator permanently deleted",
+        "admin_id":
+            admin_id,
+    }
 
 # =========================================================
 # CHANGE OWN ADMIN PASSWORD

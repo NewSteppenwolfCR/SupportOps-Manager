@@ -250,6 +250,32 @@ export async function updateAdminStatus(
 }
 
 
+export async function deleteAdmin(
+  adminId
+) {
+  const response = await adminFetch(
+    `${API_URL}/admins/${adminId}`,
+    {
+      method: "DELETE",
+      headers: getAdminHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not delete administrator"
+      )
+    );
+  }
+
+  return data;
+}
+
+
 export async function changeAdminPassword(
   currentPassword,
   newPassword
