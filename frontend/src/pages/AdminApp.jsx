@@ -11,6 +11,7 @@ import FollowUps from "./FollowUps";
 import Vacations from "./Vacations";
 import Reports from "./Reports";
 import Administrators from "./Administrators";
+import Settings from "./Settings";
 
 
 function AdminApp({
@@ -90,7 +91,7 @@ function AdminApp({
             </p>
           </div>
         );
-        
+
         case "Reports":
   return <Reports />;
 
@@ -98,6 +99,13 @@ case "Administrators":
   return (
     <Administrators
       currentAdmin={admin}
+    />
+  );
+  case "Settings":
+  return (
+    <Settings
+      admin={admin}
+      onLogout={onLogout}
     />
   );
     }
