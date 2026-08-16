@@ -1,0 +1,1417 @@
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background: #f5f7fb;
+  color: #182230;
+}
+
+button {
+  font-family: inherit;
+}
+
+
+/* =========================================================
+   APPLICATION LAYOUT
+   ========================================================= */
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+}
+
+.sidebar {
+  width: 250px;
+  min-height: 100vh;
+  background: #111827;
+  color: white;
+  padding: 26px 18px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 28px;
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  color: #111827;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.brand span {
+  display: block;
+  margin-top: 3px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.nav-item {
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #cbd5e1;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.nav-item:hover {
+  background: #1f2937;
+  color: white;
+}
+
+.nav-item.active {
+  background: #ffffff;
+  color: #111827;
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 34px;
+  max-width: 1600px;
+}
+
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.topbar h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.topbar p {
+  margin: 6px 0 0;
+  color: #667085;
+}
+
+.admin-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #111827;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.admin-profile strong,
+.admin-profile span {
+  display: block;
+}
+
+.admin-profile strong {
+  font-size: 14px;
+}
+
+.admin-profile span {
+  color: #667085;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 26px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 30px;
+  margin: 10px 0 6px;
+}
+
+.stat-label {
+  color: #475467;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stat-card small {
+  color: #98a2b3;
+}
+
+
+/* =========================================================
+   CONTENT CARDS
+   ========================================================= */
+
+.content-card {
+  background: white;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 24px;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.section-header p {
+  margin: 5px 0 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.primary-button {
+  border: 0;
+  border-radius: 9px;
+  background: #111827;
+  color: white;
+  padding: 11px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: #1f2937;
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  border: 1px solid #d0d5dd;
+  border-radius: 9px;
+  background: white;
+  color: #344054;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary-button:hover {
+  background: #f9fafb;
+}
+
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  padding: 13px 24px;
+  text-align: left;
+  color: #667085;
+  background: #f9fafb;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+td {
+  padding: 16px 24px;
+  border-top: 1px solid #eaecf0;
+  color: #344054;
+  font-size: 14px;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: #f9fafb;
+}
+
+.agent-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.agent-name strong,
+.agent-name span {
+  display: block;
+}
+
+.agent-name strong {
+  color: #101828;
+}
+
+.agent-name span {
+  color: #98a2b3;
+  margin-top: 3px;
+  font-size: 12px;
+}
+
+.agent-avatar {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #eef2f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.active-status {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.inactive-status {
+  background: #f2f4f7;
+  color: #475467;
+}
+
+.overtime-pending {
+  background: #fffaeb;
+  color: #b54708;
+}
+
+.overtime-approved {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.overtime-rejected {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+
+/* =========================================================
+   MESSAGES
+   ========================================================= */
+
+.message {
+  padding: 24px;
+  color: #667085;
+}
+
+.error-message {
+  color: #b42318;
+}
+
+.form-error {
+  margin-bottom: 18px;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: #fef3f2;
+  color: #b42318;
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.modal {
+  width: 100%;
+  max-width: 540px;
+  background: white;
+  border-radius: 16px;
+  box-shadow:
+    0 20px 30px rgba(16, 24, 40, 0.12),
+    0 8px 12px rgba(16, 24, 40, 0.08);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.modal-header p {
+  margin: 6px 0 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+.close-button {
+  border: 0;
+  background: transparent;
+  color: #667085;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   FORMS
+   ========================================================= */
+
+.agent-form {
+  padding: 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 7px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: white;
+  color: #101828;
+  font: inherit;
+  outline: none;
+}
+
+.form-group textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #667085;
+  box-shadow: 0 0 0 3px rgba(102, 112, 133, 0.12);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+
+/* =========================================================
+   AGENT PROFILE
+   ========================================================= */
+
+.back-button {
+  border: 0;
+  background: transparent;
+  color: #475467;
+  padding: 0;
+  margin-bottom: 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.agent-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #111827;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.profile-title h2 {
+  margin: 0;
+}
+
+.profile-title p {
+  margin: 6px 0 3px;
+  color: #667085;
+}
+
+.profile-title > span {
+  color: #98a2b3;
+  font-size: 14px;
+}
+
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eaecf0;
+  overflow-x: auto;
+}
+
+.profile-tab {
+  border: 0;
+  background: transparent;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: #667085;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.profile-tab:hover {
+  background: #f2f4f7;
+  color: #344054;
+}
+
+.profile-tab.active {
+  background: #111827;
+  color: white;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.profile-card {
+  overflow: hidden;
+}
+
+.profile-details {
+  padding: 22px 24px;
+  display: grid;
+  gap: 18px;
+}
+
+.profile-details span,
+.profile-details strong {
+  display: block;
+}
+
+.profile-details span {
+  margin-bottom: 4px;
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+.profile-details strong {
+  color: #344054;
+}
+
+.activity-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: #eaecf0;
+}
+
+.activity-summary div {
+  background: white;
+  padding: 24px;
+}
+
+.activity-summary strong,
+.activity-summary span {
+  display: block;
+}
+
+.activity-summary strong {
+  font-size: 24px;
+}
+
+.activity-summary span {
+  margin-top: 5px;
+  color: #667085;
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   OVERTIME
+   ========================================================= */
+
+.overtime-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.approve-button,
+.reject-button {
+  border-radius: 7px;
+  padding: 7px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.approve-button {
+  border: 1px solid #abefc6;
+  background: #ecfdf3;
+  color: #067647;
+}
+
+.reject-button {
+  border: 1px solid #fecdca;
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.approve-button:disabled,
+.reject-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.decision-complete {
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   ADMIN SESSION
+   ========================================================= */
+
+.admin-session-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.admin-session-bar > div {
+  text-align: right;
+}
+
+.admin-session-label {
+  display: block;
+  margin-bottom: 3px;
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+.admin-session-bar strong {
+  display: block;
+  color: #344054;
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   AGENT PORTAL - CURRENT COMPONENT
+   ========================================================= */
+
+.portal-login-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: #f5f7fb;
+}
+
+.portal-login-card {
+  width: 100%;
+  max-width: 440px;
+  background: white;
+  border: 1px solid #e4e7ec;
+  border-radius: 18px;
+  padding: 36px;
+  box-shadow: 0 14px 40px rgba(16, 24, 40, 0.08);
+}
+
+.portal-logo {
+  width: 58px;
+  height: 58px;
+  border-radius: 15px;
+  background: #111827;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 24px;
+  margin: 0 auto 20px;
+}
+
+.portal-login-card h1 {
+  margin: 0;
+  text-align: center;
+  color: #101828;
+  font-size: 34px;
+}
+
+.portal-subtitle {
+  color: #667085;
+  margin: 7px 0 30px;
+  text-align: center;
+}
+
+.portal-login-button {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.portal-security-note {
+  text-align: center;
+  color: #98a2b3;
+  font-size: 12px;
+  margin-top: 18px;
+}
+
+.agent-welcome-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: white;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 22px;
+}
+
+.agent-welcome-card h3 {
+  margin: 0 0 5px;
+}
+
+.agent-welcome-card p {
+  margin: 0 0 4px;
+  color: #667085;
+}
+
+.agent-welcome-card span {
+  color: #98a2b3;
+  font-size: 13px;
+}
+
+.portal-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 20px;
+}
+
+.portal-form {
+  padding: 24px;
+}
+
+.portal-form textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.portal-success {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #ecfdf3;
+  color: #027a48;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+
+/* =========================================================
+   NEW AUTHENTICATION DESIGN
+   ========================================================= */
+
+.auth-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 24px;
+
+  background:
+    radial-gradient(
+      circle at top,
+      #ffffff 0%,
+      #f5f7fb 45%,
+      #eef2f7 100%
+    );
+}
+
+.auth-wrapper {
+  width: 100%;
+  max-width: 470px;
+}
+
+.auth-brand {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.auth-logo {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #111827,
+      #172554
+    );
+
+  color: #60a5fa;
+  font-size: 34px;
+  font-weight: 800;
+
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.16);
+}
+
+.auth-brand h1 {
+  margin: 0;
+  color: #101828;
+  font-size: 46px;
+  line-height: 1;
+  font-weight: 750;
+  letter-spacing: -2px;
+}
+
+.auth-brand p {
+  margin: 12px 0 0;
+  color: #667085;
+  font-size: 18px;
+}
+
+.auth-card {
+  padding: 36px;
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 18px;
+
+  box-shadow:
+    0 14px 40px rgba(16, 24, 40, 0.08);
+}
+
+.auth-card-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #eef4ff;
+  color: #2563eb;
+
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.auth-card h2 {
+  margin: 0;
+  text-align: center;
+  color: #101828;
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.auth-card-description {
+  margin: 8px 0 30px;
+  text-align: center;
+  color: #667085;
+  font-size: 14px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-field label {
+  color: #344054;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-input-wrapper {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.auth-input-wrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow:
+    0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.auth-input-icon {
+  width: 46px;
+  flex-shrink: 0;
+  color: #667085;
+  text-align: center;
+  font-size: 14px;
+}
+
+.auth-input-wrapper input {
+  width: 100%;
+  min-width: 0;
+  padding: 14px 12px 14px 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #101828;
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.auth-input-wrapper input::placeholder {
+  color: #98a2b3;
+}
+
+.password-toggle {
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  color: #475467;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.password-toggle:hover {
+  color: #101828;
+}
+
+.auth-submit-button {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 4px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #101828;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.auth-submit-button:hover:not(:disabled) {
+  background: #1d2939;
+  transform: translateY(-1px);
+}
+
+.auth-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-error {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #fef3f2;
+  color: #b42318;
+  font-size: 13px;
+}
+
+.auth-security-note {
+  margin-top: 24px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+  color: #667085;
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1000px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sidebar {
+    width: 210px;
+  }
+}
+
+@media (max-width: 900px) {
+  .profile-grid,
+  .portal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .auth-page {
+    padding: 32px 18px;
+  }
+
+  .auth-brand {
+    margin-bottom: 28px;
+  }
+
+  .auth-brand h1 {
+    font-size: 38px;
+  }
+
+  .auth-brand p {
+    font-size: 16px;
+  }
+
+  .auth-card {
+    padding: 28px 22px;
+  }
+
+  .portal-login-card {
+    padding: 28px 22px;
+  }
+
+  .agent-profile-header {
+    align-items: flex-start;
+  }
+
+  .activity-summary {
+    grid-template-columns: 1fr;
+  }
+  .followup-open {
+  background: #fffaeb;
+  color: #b54708;
+}
+
+.followup-completed {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.followup-cancelled {
+  background: #f2f4f7;
+  color: #475467;
+}
+
+.report-files {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.attachment-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.attachment-button:hover {
+  text-decoration: underline;
+}
+
+.upload-help {
+  display: block;
+  margin-top: 7px;
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+.selected-files {
+  margin: -5px 0 18px;
+  padding: 12px 14px;
+  border: 1px solid #eaecf0;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #475467;
+  font-size: 13px;
+}
+
+.selected-files div + div {
+  margin-top: 5px;
+}
+.overtime-filters {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1.4fr)
+    minmax(180px, 1fr)
+    minmax(170px, 1fr)
+    minmax(170px, 1fr)
+    auto;
+
+  gap: 18px;
+  align-items: end;
+
+  margin: 20px 24px 24px;
+  padding: 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+
+  box-shadow:
+    0 1px 3px rgba(16, 24, 40, 0.04);
+}
+
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+
+.filter-field label {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+.filter-field select,
+.filter-field input {
+  width: 100%;
+  height: 44px;
+
+  padding: 0 12px;
+
+  border: 1px solid #d0d5dd;
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: #101828;
+
+  font: inherit;
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+
+.filter-field select:focus,
+.filter-field input:focus {
+  border-color: #667085;
+
+  box-shadow:
+    0 0 0 3px rgba(102, 112, 133, 0.12);
+}
+
+
+.filter-clear {
+  min-width: 130px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  white-space: nowrap;
+}
+
+
+@media (max-width: 1100px) {
+  .overtime-filters {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-clear {
+    width: 100%;
+  }
+}
+
+
+@media (max-width: 650px) {
+  .overtime-filters {
+    grid-template-columns: 1fr;
+    margin: 16px;
+    padding: 18px;
+  }
+}
+.profile-access-actions {
+  margin-left: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.access-code-error {
+  color: #b42318;
+  font-size: 12px;
+}
+
+.access-code-modal {
+  max-width: 460px;
+}
+
+.access-code-content {
+  padding: 28px;
+}
+
+.access-code-label {
+  display: block;
+  margin-bottom: 8px;
+
+  color: #667085;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.access-code-value {
+  padding: 18px;
+
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+
+  background: #f9fafb;
+  color: #101828;
+
+  text-align: center;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 4px;
+}
+
+.access-code-note {
+  margin: 16px 0 22px;
+
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  .agent-profile-header {
+    flex-wrap: wrap;
+  }
+
+  .profile-access-actions {
+    width: 100%;
+    margin-left: 0;
+    align-items: stretch;
+  }
+}
+}

@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: supportops-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: supportops
+      POSTGRES_PASSWORD: supportops123
+      POSTGRES_DB: supportops_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - supportops_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  supportops_postgres_data:
