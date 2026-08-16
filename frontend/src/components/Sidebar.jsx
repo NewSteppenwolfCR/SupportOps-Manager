@@ -7,6 +7,7 @@ function Sidebar({ activePage, onNavigate }) {
     "Vacations",
     "Follow-ups",
     "Reports",
+    "Administrators",
     
   ];
 

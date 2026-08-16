@@ -10,6 +10,7 @@ import Attendance from "./Attendance";
 import FollowUps from "./FollowUps";
 import Vacations from "./Vacations";
 import Reports from "./Reports";
+import Administrators from "./Administrators";
 
 
 function AdminApp({
@@ -89,8 +90,19 @@ function AdminApp({
             </p>
           </div>
         );
+        
+        case "Reports":
+  return <Reports />;
+
+case "Administrators":
+  return (
+    <Administrators
+      currentAdmin={admin}
+    />
+  );
     }
   }
+  
 
 
   return (

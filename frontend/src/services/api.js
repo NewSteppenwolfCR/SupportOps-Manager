@@ -167,6 +167,120 @@ async function adminFetch(
 }
 
 // =========================================================
+// ADMIN MANAGEMENT
+// =========================================================
+
+export async function getAdmins() {
+  const response = await adminFetch(
+    `${API_URL}/admins`,
+    {
+      headers: getAdminHeaders(),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not load administrators"
+      )
+    );
+  }
+
+  return data;
+}
+
+
+export async function createAdmin(
+  admin
+) {
+  const response = await adminFetch(
+    `${API_URL}/admins`,
+    {
+      method: "POST",
+      headers: getAdminHeaders(),
+      body: JSON.stringify(admin),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not create administrator"
+      )
+    );
+  }
+
+  return data;
+}
+
+
+export async function updateAdminStatus(
+  adminId,
+  status
+) {
+  const response = await adminFetch(
+    `${API_URL}/admins/${adminId}/status`,
+    {
+      method: "PATCH",
+      headers: getAdminHeaders(),
+      body: JSON.stringify({
+        status,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not update administrator status"
+      )
+    );
+  }
+
+  return data;
+}
+
+
+export async function changeAdminPassword(
+  currentPassword,
+  newPassword
+) {
+  const response = await adminFetch(
+    `${API_URL}/admin/change-password`,
+    {
+      method: "PATCH",
+      headers: getAdminHeaders(),
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Could not change password"
+      )
+    );
+  }
+
+  return data;
+}
+
+// =========================================================
 // AGENTS
 // =========================================================
 

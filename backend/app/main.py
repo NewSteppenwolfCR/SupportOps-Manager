@@ -13,7 +13,10 @@ from .security import (
     hash_access_code,
     verify_access_code,
 )
-from .admin_security import verify_password
+from .admin_security import (
+    hash_password,
+    verify_password,
+)
 from .auth import (
     create_access_token,
     require_agent,
@@ -71,6 +74,21 @@ class AgentAccess(BaseModel):
 class AdminLogin(BaseModel):
     email: EmailStr
     password: str
+class AdminCreate(BaseModel):
+    first_name: str
+    last_name: str
+    email: EmailStr
+    password: str
+
+
+class AdminStatusUpdate(BaseModel):
+    status: str
+
+
+class AdminPasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+    
 
 
 class OvertimeCreate(BaseModel):
@@ -161,7 +179,275 @@ def admin_login(
             "status": admin.status,
         },
     }
+# =========================================================
+# ADMIN MANAGEMENT - ADMIN ONLY
+# =========================================================
 
+@app.get("/admins")
+def get_admins(
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    admins = (
+        db.query(models.Admin)
+        .order_by(
+            models.Admin.first_name.asc(),
+            models.Admin.last_name.asc(),
+        )
+        .all()
+    )
+
+    return {
+        "total": len(admins),
+        "admins": [
+            {
+                "id": admin.id,
+                "first_name": admin.first_name,
+                "last_name": admin.last_name,
+                "email": admin.email,
+                "status": admin.status,
+                "created_at": admin.created_at,
+            }
+            for admin in admins
+        ],
+    }
+
+
+@app.post(
+    "/admins",
+    status_code=status.HTTP_201_CREATED,
+)
+def create_admin(
+    admin_data: AdminCreate,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    first_name = admin_data.first_name.strip()
+    last_name = admin_data.last_name.strip()
+    email = admin_data.email.lower().strip()
+
+    if not first_name:
+        raise HTTPException(
+            status_code=400,
+            detail="First name is required",
+        )
+
+    if not last_name:
+        raise HTTPException(
+            status_code=400,
+            detail="Last name is required",
+        )
+
+    if len(admin_data.password) < 10:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Password must contain at least "
+                "10 characters"
+            ),
+        )
+
+    existing_admin = (
+        db.query(models.Admin)
+        .filter(
+            models.Admin.email == email
+        )
+        .first()
+    )
+
+    if existing_admin:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "An administrator with this "
+                "email already exists"
+            ),
+        )
+
+    admin = models.Admin(
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        password_hash=hash_password(
+            admin_data.password
+        ),
+        status="Active",
+    )
+
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+
+    return {
+        "message":
+            "Administrator created successfully",
+        "admin": {
+            "id": admin.id,
+            "first_name": admin.first_name,
+            "last_name": admin.last_name,
+            "email": admin.email,
+            "status": admin.status,
+            "created_at": admin.created_at,
+        },
+    }
+
+
+@app.patch("/admins/{admin_id}/status")
+def update_admin_status(
+    admin_id: int,
+    update: AdminStatusUpdate,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    allowed_statuses = {
+        "Active",
+        "Inactive",
+    }
+
+    if update.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid administrator status",
+        )
+
+    try:
+        current_admin_id = int(
+            current_admin["subject"]
+        )
+
+    except (TypeError, ValueError):
+        raise HTTPException(
+            status_code=401,
+            detail=(
+                "Invalid administrator "
+                "authentication"
+            ),
+        )
+
+    admin = (
+        db.query(models.Admin)
+        .filter(
+            models.Admin.id == admin_id
+        )
+        .first()
+    )
+
+    if not admin:
+        raise HTTPException(
+            status_code=404,
+            detail="Administrator not found",
+        )
+
+    if (
+        admin.id == current_admin_id
+        and update.status == "Inactive"
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "You cannot deactivate your "
+                "own administrator account"
+            ),
+        )
+
+    admin.status = update.status
+
+    db.commit()
+    db.refresh(admin)
+
+    return {
+        "message": (
+            f"Administrator status updated "
+            f"to {admin.status}"
+        ),
+        "admin": {
+            "id": admin.id,
+            "first_name": admin.first_name,
+            "last_name": admin.last_name,
+            "email": admin.email,
+            "status": admin.status,
+        },
+    }
+
+
+# =========================================================
+# CHANGE OWN ADMIN PASSWORD
+# =========================================================
+
+@app.patch("/admin/change-password")
+def change_admin_password(
+    password_data: AdminPasswordChange,
+    current_admin=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    try:
+        admin_id = int(
+            current_admin["subject"]
+        )
+
+    except (TypeError, ValueError):
+        raise HTTPException(
+            status_code=401,
+            detail=(
+                "Invalid administrator "
+                "authentication"
+            ),
+        )
+
+    admin = (
+        db.query(models.Admin)
+        .filter(
+            models.Admin.id == admin_id
+        )
+        .first()
+    )
+
+    if not admin:
+        raise HTTPException(
+            status_code=404,
+            detail="Administrator not found",
+        )
+
+    if not verify_password(
+        password_data.current_password,
+        admin.password_hash,
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Current password is incorrect",
+        )
+
+    if len(password_data.new_password) < 10:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "New password must contain "
+                "at least 10 characters"
+            ),
+        )
+
+    if (
+        password_data.current_password
+        == password_data.new_password
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "New password must be different "
+                "from the current password"
+            ),
+        )
+
+    admin.password_hash = hash_password(
+        password_data.new_password
+    )
+
+    db.commit()
+
+    return {
+        "message":
+            "Password changed successfully",
+    }
 
 # =========================================================
 # AGENTS - ADMIN ONLY
